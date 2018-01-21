@@ -220,6 +220,23 @@ class Config(object):
         return wanted
 
     @staticmethod
+    def get_language_profiles(sonarr_url, key):
+        url = sonarr_url
+        r = requests.get(url + '/api/v3/languageprofile', headers={'X-Api-Key': key}, timeout=30)
+        data = r.json()
+        for profile in data:
+            if profile['name']:
+                print("{}: {}".format(profile['id'], profile['name']))
+        wanted = ''
+        while wanted is not int and len(data) < wanted:
+            try:
+                wanted = int(raw_input("Which quality profile do you want to download shows with?: \n"))
+            except ValueError:
+                print("Please enter the ID of your profile you want")
+                continue
+        return wanted
+
+    @staticmethod
     def check_api(sonarr_url, api_key):
         url = sonarr_url
         r = requests.get(url + '/api/system/status', headers={'X-Api-Key': api_key}, timeout=30)
@@ -238,6 +255,7 @@ class Config(object):
             else:
                 return False
         except Exception:
+            logger.exception("error checking host")
             return False
 
     @staticmethod
@@ -245,7 +263,7 @@ class Config(object):
         return str(v).lower() in ("yes", "true", "t", "1", "y")
 
     def create_config(self, arg_loc):
-        print '\033[93m' + "\nPingrr has no config, please follow the instructions to create one\n" + '\x1b[0m'
+        print '\033[93m' + "\nPingrr has no config file, please follow the instructions to create one\n" + '\x1b[0m'
 
         print "\n"
         print "####################################\n" \
@@ -270,8 +288,12 @@ class Config(object):
 
         sonarr_folder_path = raw_input("Enter the folder path you want your shows to download to: \n")
         print '\033[94m' + str(sonarr_folder_path) + '\x1b[0m' + '\n'
+        
         sonarr_quality_profile = self.get_quality_profiles(sonarr_host, sonarr_api)
         print '\033[94m' + str(sonarr_quality_profile) + '\x1b[0m' + '\n'
+        
+        sonarr_language_profile = self.get_language_profiles(sonarr_host, sonarr_api)
+        print '\033[94m' + str(sonarr_language_profile) + '\x1b[0m' + '\n'
 
         sonarr_monitored = raw_input("Add TV Shows as monitored? (yes/no): \n")
         print '\033[94m' + str(self.str2bool(sonarr_monitored)) + '\x1b[0m' + '\n'
@@ -375,6 +397,7 @@ class Config(object):
             "sonarr": {
                 "host": sonarr_host,
                 "quality_profile": sonarr_quality_profile,
+                "language_profile": sonarr_language_profile,
                 "folder_path": sonarr_folder_path,
                 "api": sonarr_api,
                 "monitored": self.str2bool(sonarr_monitored),

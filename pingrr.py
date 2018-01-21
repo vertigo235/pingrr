@@ -105,15 +105,25 @@ def send_to_sonarr(a, b, genres):
     
     path = create_path(genres, "sonarr")
 
-    payload = {"tvdbId": a, "title": b, "qualityProfileId": conf['sonarr']['quality_profile'], "images": [],
-               "seasons": [], "seasonFolder": True, "monitored": conf['sonarr']['monitored'], "rootFolderPath": path,
-               "addOptions": options, }
+    payload = {"tvdbId": a
+               , "title": b
+               , "qualityProfileId": conf['sonarr']['quality_profile']
+               , "images": []
+               , "seasons": []
+               , "seasonFolder": True
+               , "monitored": conf['sonarr']['monitored'], "rootFolderPath": path
+               , "addOptions": options
+               , "languageProfileId": conf['sonarr']['language_profile']
+               }
 
     if conf['pingrr']['dry_run']:
         logger.info("dry run is on, not sending to sonarr")              
         return True
-
-    r = requests.post(sonarr.url + '/api/series', headers=sonarr.headers, data=json.dumps(payload), timeout=30)
+    
+    url = sonarr.url + '/api/v3/series'
+    logger.debug('URL: %s', url)
+    logger.debug('Payload: %s', payload)
+    r = requests.post(url, headers=sonarr.headers, data=json.dumps(payload), timeout=30)
 
     if r.status_code == 201:
         logger.debug("sent to sonarr successfully")
@@ -268,7 +278,7 @@ def check_lists(arg, arg2):
 
 
 def filter_check(title, item_type):
-
+    logger.debug(title)
     if item_type == "shows":
         if len(title['country']):
             country = title['country'].lower()
