@@ -111,7 +111,8 @@ def send_to_sonarr(a, b, genres):
                , "images": []
                , "seasons": []
                , "seasonFolder": True
-               , "monitored": conf['sonarr']['monitored'], "rootFolderPath": path
+               , "monitored": conf['sonarr']['monitored']
+               , "rootFolderPath": path
                , "addOptions": options
                , "languageProfileId": conf['sonarr']['language_profile']
                }
@@ -135,9 +136,9 @@ def send_to_sonarr(a, b, genres):
 
 
 def send_to_radarr(a, b, genres, year):
-    """Send found tv program to sonarr"""
+    """Send found movie to radarr"""
     
-    logger.info("Attempting to send to sonarr")
+    logger.info("Attempting to send to radarr")
 
     path = create_path(genres, "radarr")
 
