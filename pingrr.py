@@ -89,11 +89,13 @@ def create_path(genres, program):
     # Set root folder for path creation
     root_folder = conf[program]['path_root']
 
-    # Check if any of the genres match up
-    for key in conf[program]['paths']:
-        for genre in conf[program]['paths'][key]:
-            if genre in genres:
-                return root_folder + key + '/'
+    # Check if any of the genres match up, only if genre paths are in config
+    if 'paths' in conf[program]:
+        for key in conf[program]['paths']:
+            for genre in conf[program]['paths'][key]:
+                if genre in genres:
+                    return root_folder + key + '/'
+    
     # If no match, return default path
     return conf[program]['folder_path']
 
@@ -101,19 +103,30 @@ def create_path(genres, program):
 def send_to_sonarr(a, b, genres):
     """Send found tv program to sonarr"""
 
-    logger.info("Attempting to send to sonarr")
+    logger.info("Attempting to send %s:%s to sonarr", a , b)
     
     path = create_path(genres, "sonarr")
 
-    payload = {"tvdbId": a, "title": b, "qualityProfileId": conf['sonarr']['quality_profile'], "images": [],
-               "seasons": [], "seasonFolder": True, "monitored": conf['sonarr']['monitored'], "rootFolderPath": path,
-               "addOptions": options, }
+    payload = {"tvdbId": a
+               , "title": b
+               , "qualityProfileId": conf['sonarr']['quality_profile']
+               , "images": []
+               , "seasons": []
+               , "seasonFolder": True
+               , "monitored": conf['sonarr']['monitored']
+               , "rootFolderPath": path
+               , "addOptions": options
+               , "languageProfileId": conf['sonarr']['language_profile']
+               }
 
     if conf['pingrr']['dry_run']:
         logger.info("dry run is on, not sending to sonarr")              
         return True
-
-    r = requests.post(sonarr.url + '/api/series', headers=sonarr.headers, data=json.dumps(payload), timeout=30)
+    
+    url = sonarr.url + '/api/v3/series'
+    logger.debug('URL: %s', url)
+    logger.debug('Payload: %s', payload)
+    r = requests.post(url, headers=sonarr.headers, data=json.dumps(payload), timeout=30)
 
     if r.status_code == 201:
         logger.debug("sent to sonarr successfully")
@@ -125,9 +138,9 @@ def send_to_sonarr(a, b, genres):
 
 
 def send_to_radarr(a, b, genres, year):
-    """Send found tv program to sonarr"""
+    """Send found movie to radarr"""
     
-    logger.info("Attempting to send to sonarr")
+    logger.info("Attempting to send to radarr")
 
     path = create_path(genres, "radarr")
 
@@ -268,7 +281,7 @@ def check_lists(arg, arg2):
 
 
 def filter_check(title, item_type):
-
+    logger.debug(title)
     if item_type == "shows":
         if len(title['country']):
             country = title['country'].lower()

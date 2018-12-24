@@ -1,8 +1,6 @@
 FROM alpine:edge
 
 # Directory where to deploy
-ENV APP_DIR=pingrr
-
 RUN \
   # Upgrade all packages
   apk --no-cache -U upgrade && \
@@ -19,16 +17,18 @@ RUN \
     && \
   # Python2 PIP
   python -m ensurepip && \
-  # Get Pingrr
-  git clone --depth 1 --single-branch https://github.com/Dec64/pingrr.git /${APP_DIR} && \
-  # Install PIP dependencies
-  pip install --no-cache-dir --upgrade pip setuptools && \
-  pip install --no-cache-dir --upgrade -r /${APP_DIR}/requirements.txt && \
-  # Remove build dependencies
+  pip install --no-cache-dir --upgrade pip setuptools 
+
+COPY requirements.txt /tmp/requirements.txt
+
+RUN pip install wheel && \
+  pip install --no-cache-dir --upgrade -r /tmp/requirements.txt 
+
+RUN rm -rf \ 
+	/tmp/* && \
   apk --no-cache del .build-deps
 
-# Change directory
-WORKDIR /${APP_DIR}
+RUN mkdir -p /app/pingrr /opt /config
 
 # Config volume
 VOLUME /config
@@ -39,6 +39,11 @@ ENV PINGRR_CONFIG=/config/config.json
 ENV PINGRR_LOGFILE=/config/pingrr.log
 # Blacklist file
 ENV PINGRR_BLACKLIST=/config/blacklist.json
+
+COPY ./pingrr /app/pingrr
+COPY ./pingrr.py /app/
+
+WORKDIR /app/
 
 # Entrypoint
 ENTRYPOINT ["python2", "pingrr.py"]

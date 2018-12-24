@@ -30,7 +30,7 @@ headers = {'X-Api-Key': conf['sonarr']['api']}
 def get_library():
     """Get sonarr library in a list of tvdbid ids"""
     library = []
-    r = requests.get(url + '/api/series', headers=headers, timeout=60)
+    r = requests.get(url + '/api/v3/series', headers=headers, timeout=60)
     try:
         if r.status_code == 401:
             logger.warning("Error when connecting to sonarr, unauthorised. check api/url")
