@@ -327,9 +327,10 @@ def filter_check(title, item_type):
                                                                                  str(title['votes'])))
             return False
 
-        if conf['filters']['allow_ended'] is False and 'ended' in title['status']:
-            logger.info("{} was rejected as it is an ended tv series".format(title['title'].encode('utf8')))
-            return False
+        if item_type == "shows":
+            if conf['filters']['allow_ended'] is False and 'ended' in title['status']:
+                logger.info("{} was rejected as it is an ended tv series".format(title['title'].encode('utf8')))
+                return False
 
         if item_type == "shows":
             if conf['filters']['allow_canceled'] is False and 'canceled' in title['status']:
