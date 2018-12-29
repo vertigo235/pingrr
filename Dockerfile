@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:3.8
 
 # Directory where to deploy
 RUN \
