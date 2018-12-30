@@ -17,10 +17,12 @@ logger = logging.getLogger(__name__)
 ################################
 # Init
 ################################
-plex = PlexServer(conf['plex']['SERVER_URL'], conf['plex']['SERVER_TOKEN'])
+if 'plex' in conf:
+    plex = PlexServer(conf['plex']['SERVER_URL'], conf['plex']['SERVER_TOKEN'])
 
 def in_plex(imdb):
     movies = plex.library.section('Movies')
+    logger.debug("Searching plex library for %s", imdb)
     if movies.search(guid=imdb):
         return True
     else:

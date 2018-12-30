@@ -59,6 +59,7 @@ logger.addHandler(fileHandler)
 
 import pingrr.trakt as trakt
 import pingrr.sonarr as sonarr
+import pingrr.plex as plex
 
 import pingrr.justWatch as justWatch
 import pingrr.radarr as radarr
@@ -298,77 +299,85 @@ def filter_check(title, item_type):
 
     lang = title['language']
 
-    if title[type_id] not in library:
-        if str(title['imdb']) in configuration.blacklist or str(title[type_id]) in configuration.blacklist:
-            logger.info("{} was rejected as it was found in the blacklist".format(title['title'].encode('utf8')))
-            return False
-        logger.debug("Checking year: {}".format(title['year']))
-        if conf['filters']['year'][item_type] > title['year']:
-            logger.info("{} was rejected as it was outside allowed year range: {}".format(title['title'].encode('utf8'),
-                                                                                          str(title['year'])))
-            return False
-
-        logger.debug("Checking runtime: {}".format(title['runtime']))
-        if conf['filters']['runtime'] > title['runtime']:
-            logger.info("{} was rejected as it was outside allowed runtime: {}".format(title['title'].encode('utf8'),
-                                                                                       str(title['runtime'])))
-            return False
-
-        if item_type == "shows":
-            if len(conf['filters']['network']) > 0:
-                if title['network'] is None or conf['filters']['network'] in title['network']:
-                    logger.info("{} was rejected as it was by a disallowed network: {}"
-                                .format(title['title'].encode('utf8'), str(title['network']).encode('utf8')))
-                return False
-        logger.debug("Checking votes: {}".format(title['votes']))
-        if conf['filters']['votes'] > title['votes']:
-            logger.info(
-                "{} was rejected as it did not meet vote requirement: {}".format(title['title'].encode('utf8'),
-                                                                                 str(title['votes'])))
-            return False
-
-        if item_type == "shows":
-            if conf['filters']['allow_ended'] is False and 'ended' in title['status']:
-                logger.info("{} was rejected as it is an ended tv series".format(title['title'].encode('utf8')))
-                return False
-
-        if item_type == "shows":
-            if conf['filters']['allow_canceled'] is False and 'canceled' in title['status']:
-                logger.info("{} was rejected as it an canceled tv show".format(title['title'].encode('utf8')))
-                return False
-
-        logger.debug("Checking rating: {}".format(title['rating']))
-        if float(title['rating']) < float(conf['filters']['rating']):
-            logger.info(
-                "{} was rejected as it was outside the allowed ratings: {}".format(title['title'].encode('utf8'),
-                                                                                   str(title['rating'])))
-            return False
-
-        logger.debug("Checking genres: {}".format(title['genres']))
-        if isinstance(conf['filters']['genre'], list):
-            if check_lists('genre', title['genres']):
-                logger.info("{} was rejected as it wasn't a wanted genre: {}".format(title['title'].encode('utf8'),
-                                                                                     str(title['genres'])))
-                return False
-
-        elif conf['filters']['genre'] == title['genres']:
-            logger.info("{} was rejected as it wasn't a wanted genre: {}".format(title['title'].encode('utf8'),
-                                                                                 str(title['genres'])))
-            return False
-
-        logger.debug("Checking country: {}".format(country))
-        if country and country not in conf['filters']['country']:
-            logger.info("{} was rejected as it wasn't a wanted country: {}".format(title['title'].encode('utf8'),
-                                                                                   str(title['country'])))
-            return False
-        logger.debug("Checking language: {}".format(lang))
-        if lang not in conf['filters']['language']:
-            logger.info("{} was rejected as it wasn't a wanted language: {}".format(title['title'].encode('utf8'), lang))
-            return False
-        return True
-
-    else:
+    if title[type_id] in library:
         logger.info("{} was rejected as it is already in {} library".format(title['title'].encode('utf8'), item_type))
+        return False
+
+    if str(title['imdb']) in configuration.blacklist or str(title[type_id]) in configuration.blacklist:
+        logger.info("{} was rejected as it was found in the blacklist".format(title['title'].encode('utf8')))
+        return False
+
+    logger.debug("Checking year: {}".format(title['year']))
+    if conf['filters']['year'][item_type] > title['year']:
+        logger.info("{} was rejected as it was outside allowed year range: {}".format(title['title'].encode('utf8'),
+                                                                                        str(title['year'])))
+        return False
+
+    logger.debug("Checking runtime: {}".format(title['runtime']))
+    if conf['filters']['runtime'] > title['runtime']:
+        logger.info("{} was rejected as it was outside allowed runtime: {}".format(title['title'].encode('utf8'),
+                                                                                    str(title['runtime'])))
+        return False
+
+    if item_type == "shows":
+        if len(conf['filters']['network']) > 0:
+            if title['network'] is None or conf['filters']['network'] in title['network']:
+                logger.info("{} was rejected as it was by a disallowed network: {}"
+                            .format(title['title'].encode('utf8'), str(title['network']).encode('utf8')))
+            return False
+    logger.debug("Checking votes: {}".format(title['votes']))
+    if conf['filters']['votes'] > title['votes']:
+        logger.info(
+            "{} was rejected as it did not meet vote requirement: {}".format(title['title'].encode('utf8'),
+                                                                                str(title['votes'])))
+        return False
+
+    if item_type == "shows":
+        if conf['filters']['allow_ended'] is False and 'ended' in title['status']:
+            logger.info("{} was rejected as it is an ended tv series".format(title['title'].encode('utf8')))
+            return False
+
+    if item_type == "shows":
+        if conf['filters']['allow_canceled'] is False and 'canceled' in title['status']:
+            logger.info("{} was rejected as it an canceled tv show".format(title['title'].encode('utf8')))
+            return False
+
+    logger.debug("Checking rating: {}".format(title['rating']))
+    if float(title['rating']) < float(conf['filters']['rating']):
+        logger.info(
+            "{} was rejected as it was outside the allowed ratings: {}".format(title['title'].encode('utf8'),
+                                                                                str(title['rating'])))
+        return False
+
+    logger.debug("Checking genres: {}".format(title['genres']))
+    if isinstance(conf['filters']['genre'], list):
+        if check_lists('genre', title['genres']):
+            logger.info("{} was rejected as it wasn't a wanted genre: {}".format(title['title'].encode('utf8'),
+                                                                                    str(title['genres'])))
+            return False
+    elif conf['filters']['genre'] == title['genres']:
+        logger.info("{} was rejected as it wasn't a wanted genre: {}".format(title['title'].encode('utf8'),
+                                                                                str(title['genres'])))
+        return False
+
+    logger.debug("Checking country: {}".format(country))
+    if country and country not in conf['filters']['country']:
+        logger.info("{} was rejected as it wasn't a wanted country: {}".format(title['title'].encode('utf8'),
+                                                                                str(title['country'])))
+        return False
+
+    logger.debug("Checking language: {}".format(lang))
+    if lang not in conf['filters']['language']:
+        logger.info("{} was rejected as it wasn't a wanted language: {}".format(title['title'].encode('utf8'), lang))
+        return False
+    
+    if 'plex' in conf:
+        if item_type == "movies":
+            if plex.in_plex(title['imdb']):
+                logger.info("{} was rejected as it is already in the plex library.".format(title['title'].encode('utf8')))
+                return False    
+    
+    return True
 
 
 def filter_list(list_type):
