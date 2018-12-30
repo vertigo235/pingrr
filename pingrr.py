@@ -260,7 +260,7 @@ def new_check(item_type):
 
     for x in new:
         logger.debug('checking {} from list: {}'.format(item_type, x['title'].encode('utf8')))
-        if x[item_id] not in library and conf['filters']['allow_ended']:
+        if x[item_id] not in library and (conf['filters']['allow_ended'] or item_type == "movies"):
             logger.info('new media found, adding {} {} now'.format(len(new), item_type))
             add_media(program)
             break
