@@ -370,13 +370,18 @@ def filter_check(title, item_type):
     if lang not in conf['filters']['language']:
         logger.info("{} was rejected as it wasn't a wanted language: {}".format(title['title'].encode('utf8'), lang))
         return False
-    
+
     if 'plex' in conf:
         if item_type == "movies":
-            if plex.in_plex(title['imdb']):
+            if plex.movie_in_plex(title['imdb'], conf['plex']['MOVIE_SECTION']):
                 logger.info("{} was rejected as it is already in the plex library.".format(title['title'].encode('utf8')))
-                return False    
-    
+                return False
+        
+        if item_type == "shows":
+            if plex.series_in_plex(title['tvdb'], conf['plex']['TV_SECTION']):
+                logger.info("{} was rejected as it is already in the plex library.".format(title['title'].encode('utf8')))
+                return False
+
     return True
 
 
