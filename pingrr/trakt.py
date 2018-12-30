@@ -143,7 +143,8 @@ def get_trakt_data(name, cat):
     """Get trakt list info"""
 
     if cat == 'trending':
-        url = "https://api.trakt.tv/{}/{}/?limit=100&extended=full".format(name, cat)
+        #url = "https://api.trakt.tv/{}/{}/?limit=100&extended=full".format(name, cat)
+        url = "https://api.trakt.tv/{}/{}/?limit={}&extended=full".format(name, cat, str(conf['trakt']['limit']))
     else:
         url = "https://api.trakt.tv/{}/{}/?limit={}&extended=full".format(name, cat, str(conf['trakt']['limit']))
 
@@ -230,18 +231,6 @@ def get_trakt_data(name, cat):
                       'aired': obj['aired_episodes']})
             logger.debug("got {}'s info successfully".format(obj['title'].encode('utf8')))
     return x
-
-
-# def get_json_data(tvdb):
-#     url = "http://skyhook.sonarr.tv/v1/tvdb/shows/en/{}".format(tvdb)
-#     r = requests.get(url)
-#     if r.status_code == requests.codes.ok:
-#         logger.debug('got json data for {} successfully'.format(tvdb))
-#         return r.json()
-#     else:
-#         logger.debug('failed to get json data for {}'.format(tvdb))
-#         return False
-
 
 def get_info(arg):
 
