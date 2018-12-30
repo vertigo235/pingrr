@@ -45,7 +45,7 @@ def search_movie(movie_id):
 
 
 def get_library():
-    """Get radarr library in a list of imdb ids"""
+    """Get radarr library in a list of tmdb ids"""
     library = []
     r = requests.get(url + '/api/movie', headers=headers, timeout=60)
     try:
